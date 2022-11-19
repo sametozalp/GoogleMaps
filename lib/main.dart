@@ -1,0 +1,90 @@
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Google Maps Demo',
+      home: GoogleMaps(),
+    );
+  }
+}
+
+class GoogleMaps extends StatefulWidget {
+  @override
+  State<GoogleMaps> createState() => GoogleMapsState();
+}
+
+class GoogleMapsState extends State<GoogleMaps> {
+  final Set<Marker> isaretleyici = {};
+
+  void isaretlemeFonk() {
+    setState(() {
+      isaretleyici.add(
+        Marker(
+          markerId: MarkerId('kameraBasla'),
+          position: kameraBasla.target,
+          icon: BitmapDescriptor.defaultMarker,
+          infoWindow: InfoWindow(
+            //title:
+            //snippet:
+          ),
+        ),
+      );
+    });
+  }
+
+  Completer<GoogleMapController> _controller = Completer();
+
+  static final CameraPosition kameraBasla = CameraPosition(
+    target: LatLng(39.482253, 29.8960314),
+    zoom: 14.4746,
+  );
+
+  static final CameraPosition _kLake = CameraPosition(
+      bearing: 192.8334901395799,
+      target: LatLng(39.482253, 29.8960314),
+      tilt: 59.440717697143555,
+      zoom: 19.151926040649414);
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+        appBar: AppBar(
+          title: Text('KARANDA Konum Seçin:'),
+          backgroundColor: Colors.black,
+        ),
+        body: Stack(
+          children: [
+            GoogleMap(
+              mapType: MapType.normal,
+              markers: isaretleyici,
+              initialCameraPosition: kameraBasla, //kameranın başladığı nokta
+              onMapCreated: (GoogleMapController controller) {
+                _controller.complete(controller);
+              },
+            ),
+            FloatingActionButton(
+              onPressed: eveDon,
+              child: Icon(Icons.add_location, size: 36,),
+            ),
+            /*
+            floatingActionButton: FloatingActionButton.extended(
+              onPressed: eveDon,
+              label: Text('Eve Dön'),
+              icon: Icon(Icons.home),
+            ),
+            */
+          ],
+        ));
+  }
+
+  Future<void> eveDon() async {
+    final GoogleMapController controller = await _controller.future;
+    controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
+  }
+}
